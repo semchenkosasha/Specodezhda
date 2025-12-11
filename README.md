@@ -379,7 +379,108 @@ public class CustomBearerTokenAuthenticationEntryPoint implements Authentication
 
 ### Unit-тесты
 
-Представить код тестов для пяти методов и его пояснение
+```
+    @Test
+    void testFindAll() {
+        Inventory inventory = dummyInventory();
+        InventoryDto dto = dummyDto();
+        when(service.findAll()).thenReturn(List.of(inventory));
+        when(toDtoConverter.convert(inventory)).thenReturn(dto);
+        Result result = controller.findAll();
+        assertTrue(result.isFlag());
+        assertEquals(StatusCode.SUCCESS, result.getCode());
+        assertEquals("Success Find All", result.getMessage());
+        assertEquals(List.of(dto), result.getData());
+    }
+```
+
+Данный тест проверяет корректность работы контроллера при запросе всех элементов инвентаря по методу findAll(). В тесте создаются фиктивные объекты Inventory и соответствующий им DTO InventoryDto. Сервисный метод findAll() имитируется для возврата списка с одним объектом Inventory, а конвертер преобразует его в DTO. В ответе ожидается, что флаг результата будет true, код состояния — SUCCESS, сообщение — "Success Find All", а данные — список с DTO. Также тест проверяет, что данные корректно преобразованы в DTO и возвращены в ответе.
+
+```
+ @Test
+    void testFind() {
+        String id = "123";
+        Inventory inventory = dummyInventory();
+        InventoryDto dto = dummyDto();
+        when(service.find(id)).thenReturn(inventory);
+        when(toDtoConverter.convert(inventory)).thenReturn(dto);
+        Result result = controller.find(id);
+        assertTrue(result.isFlag());
+        assertEquals("Success Find", result.getMessage());
+        assertEquals(dto, result.getData());
+    }
+```
+
+Данный тест проверяет корректность работы контроллера при запросе одного элемента инвентаря по идентификатору. В тесте имитируется возврат сервисом объекта Inventory, который затем преобразуется в DTO с помощью конвертера. В ответе ожидается, что флаг результата будет true, сообщение — "Success Find", а данные — DTO объекта.
+
+```
+ @Test
+    void testSave() {
+        InventoryDto dto = dummyDto();
+        Inventory inventory = dummyInventory();
+        when(toConverter.convert(dto)).thenReturn(inventory);
+        when(service.save(inventory, "cat1", "pos1", "prov1")).thenReturn(inventory);
+        when(toDtoConverter.convert(inventory)).thenReturn(dto);
+        Result result = controller.save(dto, "cat1", "pos1", "prov1");
+        assertTrue(result.isFlag());
+        assertEquals("Success Save", result.getMessage());
+        assertEquals(dto, result.getData());
+    }
+```
+
+Тест проверяет корректность работы контроллера при сохранении нового элемента инвентаря. DTO преобразуется в объект Inventory с помощью конвертера, затем сервис сохраняет объект с заданными категориями, позициями и поставщиком. В ответе ожидается флаг true, сообщение "Success Save" и данные — DTO сохранённого объекта.
+
+```
+@Test
+    void testUpdate() {
+        String id = "123";
+        InventoryDto dto = dummyDto();
+        Inventory inventory = dummyInventory();
+        when(toConverter.convert(dto)).thenReturn(inventory);
+        when(service.update(id, inventory, "cat1", "pos1", "prov1")).thenReturn(inventory);
+        when(toDtoConverter.convert(inventory)).thenReturn(dto);
+        Result result = controller.update(id, dto, "cat1", "pos1", "prov1");
+        assertTrue(result.isFlag());
+        assertEquals("Success Update", result.getMessage());
+        assertEquals(dto, result.getData());
+    }
+```
+
+Данный тест проверяет корректность работы контроллера при обновлении существующего элемента инвентаря. DTO преобразуется в объект Inventory, передаётся в сервис вместе с идентификатором и дополнительными параметрами. В ответе ожидается флаг true, сообщение "Success Update" и данные — DTO обновлённого объекта.
+
+```
+@Test
+    void testUpdateImg() {
+        String id = "123";
+        MockMultipartFile file = new MockMultipartFile("file", "test.png", "image/png", "image".getBytes());
+        Inventory inventory = dummyInventory();
+        InventoryDto dto = dummyDto();
+        when(service.updateImg(id, file)).thenReturn(inventory);
+        when(toDtoConverter.convert(inventory)).thenReturn(dto);
+        Result result = controller.updateImg(id, file);
+        assertTrue(result.isFlag());
+        assertEquals("Success Update Img", result.getMessage());
+        assertEquals(dto, result.getData());
+    }
+```
+
+Тест проверяет корректность работы контроллера при обновлении изображения элемента инвентаря. Сервис возвращает обновлённый объект Inventory, который конвертируется в DTO. В ответе ожидается флаг true, сообщение "Success Update Img" и данные — DTO с обновлённым изображением.
+
+```
+@Test
+    void testDelete() {
+        String id = "123";
+        doNothing().when(service).delete(id);
+        Result result = controller.delete(id);
+        assertTrue(result.isFlag());
+        assertEquals(StatusCode.SUCCESS, result.getCode());
+        assertEquals("Success Delete", result.getMessage());
+        assertNull(result.getData());
+        verify(service, times(1)).delete(id);
+    }
+```
+
+Данный тест проверяет корректность работы контроллера при удалении элемента инвентаря по идентификатору. Сервисный метод delete() имитируется без фактического удаления. В ответе ожидается флаг true, код SUCCESS, сообщение "Success Delete" и отсутствие данных. Также проверяется, что метод delete() сервиса был вызван ровно один раз.
 
 ### Интеграционные тесты
 
